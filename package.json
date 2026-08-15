@@ -1,0 +1,27 @@
+{
+  "name": "pi-luna-workflow",
+  "version": "0.1.0",
+  "description": "Configurable Luna-Max preflight, read-only review, and explicit Sol-Max consultation for Pi.",
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "luna-max",
+    "sol-max",
+    "code-review"
+  ],
+  "license": "UNLICENSED",
+  "pi": {
+    "extensions": [
+      "./extensions/luna-workflow.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  }
+}
