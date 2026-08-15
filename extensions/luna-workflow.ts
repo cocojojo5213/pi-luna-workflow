@@ -509,13 +509,13 @@ async function runChild(options: {
     THINKING_LEVEL,
   ];
 
+  for (const extensionPath of options.config.childExtensions) {
+    args.push("--extension", extensionPath);
+  }
   if (options.tools.length === 0) {
     args.push("--no-tools");
   } else {
     args.push("--extension", options.config.guardPath);
-    for (const extensionPath of options.config.childExtensions) {
-      args.push("--extension", extensionPath);
-    }
     args.push("--tools", options.tools.join(","));
   }
   args.push("--system-prompt", options.systemPrompt, options.prompt);
