@@ -1,6 +1,9 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
+import assert from "node:assert/strict";
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { checkChildPath, resolveChildWorkingDirectory } from "../extensions/child-path-policy.mjs";
 
 const root = new URL("..", import.meta.url);
 const rootPath = decodeURIComponent(root.pathname).replace(/\/$/, "");
@@ -11,6 +14,7 @@ const requiredFiles = [
   "README.zh-CN.md",
   "extensions/luna-workflow.ts",
   "extensions/child-readonly-guard.ts",
+  "extensions/child-path-policy.mjs",
   "skills/luna-workflow/SKILL.md",
 ];
 
@@ -46,4 +50,27 @@ for (const relativePath of requiredFiles) {
   }
 }
 
-console.log(`Package structure check passed (${requiredFiles.length} files).`);
+const tempRoot = await mkdtemp(join(tmpdir(), "pi-luna-workflow-"));
+const outsideRoot = await mkdtemp(join(tmpdir(), "pi-luna-workflow-outside-"));
+try {
+  await mkdir(join(tempRoot, ".ssh"));
+  await writeFile(join(outsideRoot, "visible.txt"), "outside\n");
+  await symlink(outsideRoot, join(tempRoot, "link"), "dir");
+
+  assert.ok(await checkChildPath("../outside", tempRoot), "out-of-root path must be rejected");
+  assert.ok(await checkChildPath(".ssh/id_rsa", tempRoot), "SSH private key path must be rejected");
+  assert.ok(await checkChildPath("link/visible.txt", tempRoot), "symlink escape must be rejected");
+
+  let protectedRootRejected = false;
+  try {
+    await resolveChildWorkingDirectory(tempRoot, ".ssh");
+  } catch {
+    protectedRootRejected = true;
+  }
+  assert.equal(protectedRootRejected, true, "protected child roots must be rejected");
+} finally {
+  await rm(tempRoot, { recursive: true, force: true });
+  await rm(outsideRoot, { recursive: true, force: true });
+}
+
+console.log(`Package structure and child-path checks passed (${requiredFiles.length} files).`);

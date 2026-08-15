@@ -10,6 +10,7 @@ import {
   type ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { resolveChildWorkingDirectory } from "./child-path-policy.mjs";
 
 const PREFLIGHT_MESSAGE = "luna-workflow-preflight";
 const REVIEW_TOOL_NAME = "luna_review";
@@ -780,7 +781,7 @@ export default function lunaWorkflow(pi: ExtensionAPI) {
       requireLunaParent(ctx, REVIEW_TOOL_NAME);
       if (!config.lunaModel) throw new Error(`luna_review is not configured: ${configSummary()}`);
 
-      const childCwd = resolve(ctx.cwd, params.cwd ?? ".");
+      const childCwd = await resolveChildWorkingDirectory(ctx.cwd, params.cwd ?? ".");
       if (!existsSync(childCwd) || !statSync(childCwd).isDirectory()) {
         throw new Error(`Luna review directory does not exist or is not a directory: ${childCwd}`);
       }
@@ -854,7 +855,7 @@ export default function lunaWorkflow(pi: ExtensionAPI) {
       requireLunaParent(ctx, SOL_TOOL_NAME);
       if (!config.solModel) throw new Error(`sol_consult is not configured: ${configSummary()}`);
 
-      const packetCwd = resolve(ctx.cwd, params.cwd ?? ".");
+      const packetCwd = await resolveChildWorkingDirectory(ctx.cwd, params.cwd ?? ".");
       if (!existsSync(packetCwd) || !statSync(packetCwd).isDirectory()) {
         throw new Error(`Sol consultation directory identity does not exist or is not a directory: ${packetCwd}`);
       }
