@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "roles": {
+    "primary": {
+      "model": "gpt-6-luna",
+      "reasoning": "max"
+    },
+    "reviewer": {
+      "model": "gpt-6-luna",
+      "reasoning": "max"
+    },
+    "advisor": {
+      "model": "gpt-6-astra",
+      "reasoning": "low"
+    }
+  }
+}

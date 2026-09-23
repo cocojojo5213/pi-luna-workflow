@@ -1,13 +1,20 @@
 {
   "name": "pi-luna-workflow",
   "version": "0.1.0",
-  "description": "Configurable Luna-Max preflight, read-only review, and explicit Sol-Max consultation for Pi.",
+  "description": "Shared Luna-Max, Astra-low engineering workflow with Pi and Codex adapters.",
   "type": "module",
+  "scripts": {
+    "start:pi": "node scripts/launch.mjs pi",
+    "start:codex": "node scripts/launch.mjs codex",
+    "sync:codex": "node scripts/sync-codex.mjs",
+    "verify": "node scripts/verify-package.mjs"
+  },
   "keywords": [
     "pi-package",
-    "pi-extension",
+    "codex-skill",
+    "cross-platform-workflow",
     "luna-max",
-    "sol-max",
+    "astra-low",
     "code-review"
   ],
   "license": "UNLICENSED",

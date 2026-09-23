@@ -16,12 +16,20 @@ const requiredFiles = [
   "extensions/child-readonly-guard.ts",
   "extensions/child-path-policy.mjs",
   "skills/luna-workflow/SKILL.md",
+  "skills/luna-workflow/references/workflow-contract.md",
+  "workflow/roles.json",
+  "adapters/codex/README.md",
+  "scripts/launch.mjs",
+  "scripts/sync-codex.mjs",
 ];
 
 const requiredText = {
-  "README.md": ["pi install", "luna_review", "sol_consult", "LUNA_WORKFLOW_LUNA_MODEL"],
-  "README.zh-CN.md": ["pi install", "luna_review", "sol_consult", "LUNA_WORKFLOW_LUNA_MODEL"],
-  "extensions/luna-workflow.ts": ["USER_INTENT", "luna_review", "sol_consult", "--no-session", "--no-tools"],
+  "README.md": ["pi install", "luna_review", "advisor_consult", "workflow/roles.json", "sync:codex", "start:codex"],
+  "README.zh-CN.md": ["pi install", "luna_review", "advisor_consult", "workflow/roles.json", "sync:codex", "start:codex"],
+  "extensions/luna-workflow.ts": ["USER_INTENT", "luna_review", "advisor_consult", "LUNA_WORKFLOW_ADVISOR_THINKING", "--no-session", "--no-tools"],
+  "skills/luna-workflow/references/workflow-contract.md": ["Primary", "Advisor", "Reviewer"],
+  "scripts/launch.mjs": ["Usage: node scripts/launch.mjs", "max reasoning", "LUNA_WORKFLOW_PI_PROVIDER"],
+  "scripts/sync-codex.mjs": ["astra_consult.toml", "luna_reviewer.toml", "leaving it untouched"],
 };
 
 const forbiddenText = [
@@ -37,6 +45,18 @@ if (manifest.private === true) throw new Error("package.json must be publishable
 if (manifest.license !== "UNLICENSED") throw new Error("license meaning must remain explicit as UNLICENSED");
 if (!manifest.pi?.extensions?.includes("./extensions/luna-workflow.ts")) {
   throw new Error("Pi extension is missing from the manifest");
+}
+
+const rolesConfig = JSON.parse(await readFile(join(rootPath, "workflow/roles.json"), "utf8"));
+const { primary, reviewer, advisor } = rolesConfig.roles ?? {};
+if (!primary?.model || !reviewer?.model || !advisor?.model) {
+  throw new Error("workflow/roles.json must configure primary, reviewer, and advisor models");
+}
+if (primary.model !== reviewer.model || primary.reasoning !== "max" || reviewer.reasoning !== "max") {
+  throw new Error("primary and reviewer must share the same model at max reasoning");
+}
+if (advisor.reasoning !== "low") {
+  throw new Error("the advisor role must use low reasoning");
 }
 
 for (const relativePath of requiredFiles) {
